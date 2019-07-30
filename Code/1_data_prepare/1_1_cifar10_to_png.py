@@ -52,16 +52,23 @@ if __name__ == '__main__':
     # 生成测试集图片
     test_data_path = os.path.join(data_dir, "test_batch")
     test_data = unpickle(test_data_path)
+    ## have a look at 'test_data'
+    # fo_ = open("test_data.txt","w")
+    # fo_.write(str(test_data))
+    # print (test_data)
+    fo_1 = open("label_mum.txt", "w")
     for i in range(0, 10000):
         img = np.reshape(test_data[b'data'][i], (3, 32, 32))
         img = img.transpose(1, 2, 0)
 
         label_num = str(test_data[b'labels'][i])
-        o_dir = os.path.join(test_o_dir, label_num)
+
+        fo_1.write(label_num+"\n")
+        o_dir = os.path.join(test_o_dir+"_1", label_num)
         my_mkdir(o_dir)
 
         img_name = label_num + '_' + str(i) + '.png'
         img_path = os.path.join(o_dir, img_name)
         imsave(img_path, img)
-
+    fo_1.close()
     print("test_batch loaded.")

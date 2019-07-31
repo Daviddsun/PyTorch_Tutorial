@@ -65,11 +65,10 @@ valid_loader = DataLoader(dataset=valid_data, batch_size=valid_bs)
 
 # ------------------------------------ step 2/5 : 定义网络------------------------------------
 
-
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.conv1 = nn.Conv2d(3, 6, 5)
+        self.conv1 = nn.Conv2d(3, 6, 5) # 3 channel in, 6 channel out, 5*5 conv kernel.
         self.pool1 = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(6, 16, 5)
         self.pool2 = nn.MaxPool2d(2, 2)

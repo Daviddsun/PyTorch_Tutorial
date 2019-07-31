@@ -12,7 +12,7 @@ import random
 
 train_txt_path = '../../Data/train.txt'
 
-CNum = 2000     # 挑选多少图片进行计算
+CNum = 2    # 挑选多少图片进行计算
 
 img_h, img_w = 32, 32
 imgs = np.zeros([img_w, img_h, 3, 1])
@@ -27,9 +27,12 @@ with open(train_txt_path, 'r') as f:
 
         img = cv2.imread(img_path)
         img = cv2.resize(img, (img_h, img_w))
+        # print(img)
 
         img = img[:, :, :, np.newaxis]
+        # print(img)
         imgs = np.concatenate((imgs, img), axis=3)
+        # print(imgs)
         print(i)
 
 imgs = imgs.astype(np.float32)/255.
@@ -37,6 +40,7 @@ imgs = imgs.astype(np.float32)/255.
 
 for i in range(3):
     pixels = imgs[:,:,i,:].ravel()  # 拉成一行
+    print(pixels)
     means.append(np.mean(pixels))
     stdevs.append(np.std(pixels))
 

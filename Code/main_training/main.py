@@ -35,7 +35,7 @@ log_dir = os.path.join(result_dir, time_str)
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 
-writer = SummaryWriter(log_dir=log_dir)
+writer = SummaryWriter(logdir=log_dir)
 
 # ------------------------------------ step 1/5 : 加载数据------------------------------------
 

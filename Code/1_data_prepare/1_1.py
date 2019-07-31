@@ -19,7 +19,7 @@ def unpickle(file):
 test_data_path = os.path.join(data_dir,"test_batch")
 test_data = unpickle(test_data_path)
 
-for i in range (0,100):
+for i in range (0,10000):
     img = np.reshape(test_data[b'data'][i],(3,32,32))
     img = img.transpose(1,2,0)
 

@@ -65,6 +65,7 @@ valid_loader = DataLoader(dataset=valid_data, batch_size=valid_bs)
 
 # ------------------------------------ step 2/5 : 定义网络------------------------------------
 
+
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()

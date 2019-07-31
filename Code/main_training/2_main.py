@@ -112,7 +112,19 @@ for epoch in range(max_epoch):
         loss_sigma += loss.item()
 
         if i%10 == 9:
-           loss_avg = loss_sigma/10
-           loss_sigma = 0
-           print("Training epoch:[{:0>3}/{:0>3}] Iteration:[{:0>3}/{:0>3}]   Loss:[:.4f] Acc:{:.2%} ".format(epoch+1,max_epoch,i+1,len(train_loader),loss_avg,correct/total))
+            loss_avg = loss_sigma/10
+            loss_sigma = 0
+            print("Training epoch:[{:0>3}/{:0>3}] Iteration:[{:0>3}/{:0>3}]   Loss:[:.4f] Acc:{:.2%} ".format(epoch+1,max_epoch,i+1,len(train_loader),loss_avg,correct/total))
+            writer.addscalar('Loss_group', {'train_loss':loss_avg},epoch)
+            writer.addscalar('learning rate',scheduler.get_lr()[0],epoch)
+            writer.addscalar('Accuracy group',{'train_acc',correct/total},epoch)
+    for name,layer in net.named_parameters():
+        writer.addhistogram(name + '_grad', layer.grad.cpu().numpy(),epoch)
+        writer.addhistogram(name + '_data',layer.cpu().numpy(),epoch)
+# ------   -------
+    if epoch%2 ==0:
+        loss_sigma = 0.0
+        cls_num = len(classes_name)
+        conf_mat = np.zeros([cls_num,cls_num])
+        net.eval()
 

@@ -127,34 +127,34 @@ for epoch in range(max_epoch):
         writer.add_histogram(name + '_grad', layer.grad.cpu().numpy(),epoch)
         writer.add_histogram(name + '_data',layer.cpu().data.numpy(),epoch)
 # ------  verify  -------
-    if epoch%2 ==0:
-        loss_sigma = 0.0
-        cls_num = len(classes_name)
-        conf_mat = np.zeros([cls_num,cls_num])
-        net.eval()
-        for i, data in enumerate(valid_loader):
-            images, labels = data
-            images, labels = Variable(images),Variable(labels)
-            outputs = net(images)
-            outputs.detach_()
-            loss = criterion(outputs,labels)
-            loss_sigma += loss.item()
-
-            _,predicted = torch.max(outputs.data, 1)
-            for j in range(len(labels)):
-                cate_i = labels[j].numpy()
-                pre_i = predicted[j].numpy()
-                conf_mat[cate_i,pre_i] += 1.0
-
-        print('{} set Accuracy:{:.2%}'.format('Valid',conf_mat.trace()/conf_mat.sum()))
-        writer.add_scalars('Loss_group',{'valid_loss': loss_sigma / len(valid_loader)},epoch)
-        writer.add_scalars('Accuracy_group',{'valid_acc': conf_mat.trace() / conf_mat.sun()},epoch)
+#     if epoch%2 ==0:
+#         loss_sigma = 0.0
+#         cls_num = len(classes_name)
+#         conf_mat = np.zeros([cls_num,cls_num])
+#         net.eval()
+#         for i, data in enumerate(valid_loader):
+#             images, labels = data
+#             images, labels = Variable(images),Variable(labels)
+#             outputs = net(images)
+#             outputs.detach_()
+#             loss = criterion(outputs,labels)
+#             loss_sigma += loss.item()
+#
+#             _,predicted = torch.max(outputs.data, 1)
+#             for j in range(len(labels)):
+#                 cate_i = labels[j].numpy()
+#                 pre_i = predicted[j].numpy()
+#                 conf_mat[cate_i,pre_i] += 1.0
+#
+#         print('{} set Accuracy:{:.2%}'.format('Valid',conf_mat.trace()/conf_mat.sum()))
+#         writer.add_scalars('Loss_group',{'valid_loss': loss_sigma / len(valid_loader)},epoch)
+#         writer.add_scalars('Accuracy_group',{'valid_acc': conf_mat.trace() / conf_mat.sun()},epoch)
 print('Finished Training!')
 #----- save model draw confuse matrix ------
 net_save_path = os.path.join(log_dir,'net_param.pkl')
 torch.save(net.state_dict(),net_save_path)
 conf_mat_train,train_acc = validate(net, train_loader, 'train', classes_name)
-conf_mat_valid,valid_acc = validate(net, valid_loader, 'valid', classes_name)
+# conf_mat_valid,valid_acc = validate(net, valid_loader, 'valid', classes_name)
 show_confMat(conf_mat_train,classes_name, 'train', log_dir)
-show_confMat(conf_mat_valid,classes_name, 'valid', log_dir)
+# show_confMat(conf_mat_valid,classes_name, 'valid', log_dir)
 

@@ -1,0 +1,7 @@
+/home/sun/Documents/7_marker/6.png 6
+/home/sun/Documents/7_marker/1.png 1
+/home/sun/Documents/7_marker/3.png 3
+/home/sun/Documents/7_marker/5.png 5
+/home/sun/Documents/7_marker/4.png 4
+/home/sun/Documents/7_marker/2.png 2
+/home/sun/Documents/7_marker/7.png 7

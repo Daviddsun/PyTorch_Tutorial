@@ -3,7 +3,7 @@ import glob
 import shutil
 import random
 
-dataset_dir = '../../Data/cifar-10-png/raw_test_0/'
+dataset_dir = '../../Data/cifar-10-png/raw_test/'
 train_dir = '../../Data/train/'
 valid_dir = '../../Data/valid/'
 test_dir = '../../Data/test/'

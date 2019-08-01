@@ -22,7 +22,7 @@ classes_name = ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', '
 train_bs = 16
 valid_bs = 16
 lr_init = 0.001
-max_epoch = 1
+max_epoch = 100
 
 # ---- log ----
 result_dir = '../../Result/'
@@ -63,12 +63,14 @@ class Net (nn.Module):
         self.pool1 = nn.MaxPool2d(2,2)
         self.conv2 = nn.Conv2d(6,16,5)
         self.pool2 = nn.MaxPool2d(2,2)
+        self.conv3 = nn.Conv2d(16,16,1)
         self.fc1 = nn.Linear(16*5*5,120)
         self.fc2 = nn.Linear(120,84)
         self.fc3 = nn.Linear(84,10)
     def forward(self,x):
         x = self.pool1(F.relu(self.conv1(x)))
         x = self.pool2(F.relu(self.conv2(x)))
+        # x = F.relu(self.conv3(x))
         x = x.view(-1,16*5*5)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
@@ -90,6 +92,7 @@ class Net (nn.Module):
 net = Net()
 net.initialization()
 # ---- define lossfunc and optimizer---
+# criterion1 = FocalBinaryCrossEntropy(size_average=True, gamma=0, alpha=0.5)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(),lr = lr_init, momentum = 0.9, dampening = 0.1)
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer,step_size = 50,gamma = 0.1)
@@ -118,43 +121,43 @@ for epoch in range(max_epoch):
 
         if i%10 == 9:
             loss_avg = loss_sigma/10
-            loss_sigma = 0
-            print("Training epoch:[{:0>3}/{:0>3}] Iteration:[{:0>3}/{:0>3}]   Loss:[:.4f] Acc:{:.2%} ".format(epoch+1,max_epoch,i+1,len(train_loader),loss_avg,correct/total))
+            loss_sigma = 0.0
+            print("Training epoch:[{:0>3}/{:0>3}] Iteration:[{:0>3}/{:0>3}]   Loss:{:.4f} Acc:{:.2%} ".format(epoch+1,max_epoch,i+1,len(train_loader),loss_avg,correct/total))
             writer.add_scalars('Loss_group', {'train_loss':loss_avg},epoch)
-            writer.add_scalars('learning rate',scheduler.get_lr()[0],epoch)
-            writer.add_scalars('Accuracy group',{'train_acc',correct/total},epoch)
+            writer.add_scalar('learning rate',scheduler.get_lr()[0],epoch)
+            writer.add_scalars('Accuracy group',{'train_acc':correct/total},epoch)
     for name,layer in net.named_parameters():
         writer.add_histogram(name + '_grad', layer.grad.cpu().numpy(),epoch)
         writer.add_histogram(name + '_data',layer.cpu().data.numpy(),epoch)
 # ------  verify  -------
-#     if epoch%2 ==0:
-#         loss_sigma = 0.0
-#         cls_num = len(classes_name)
-#         conf_mat = np.zeros([cls_num,cls_num])
-#         net.eval()
-#         for i, data in enumerate(valid_loader):
-#             images, labels = data
-#             images, labels = Variable(images),Variable(labels)
-#             outputs = net(images)
-#             outputs.detach_()
-#             loss = criterion(outputs,labels)
-#             loss_sigma += loss.item()
-#
-#             _,predicted = torch.max(outputs.data, 1)
-#             for j in range(len(labels)):
-#                 cate_i = labels[j].numpy()
-#                 pre_i = predicted[j].numpy()
-#                 conf_mat[cate_i,pre_i] += 1.0
-#
-#         print('{} set Accuracy:{:.2%}'.format('Valid',conf_mat.trace()/conf_mat.sum()))
-#         writer.add_scalars('Loss_group',{'valid_loss': loss_sigma / len(valid_loader)},epoch)
-#         writer.add_scalars('Accuracy_group',{'valid_acc': conf_mat.trace() / conf_mat.sun()},epoch)
+    if epoch%2 ==0:
+        loss_sigma = 0.0
+        cls_num = len(classes_name)
+        conf_mat = np.zeros([cls_num,cls_num])
+        net.eval()
+        for i, data in enumerate(valid_loader):
+            images, labels = data
+            images, labels = Variable(images),Variable(labels)
+            outputs = net(images)
+            outputs.detach_()
+            loss = criterion(outputs,labels)
+            loss_sigma += loss.item()
+
+            _,predicted = torch.max(outputs.data, 1)
+            for j in range(len(labels)):
+                cate_i = labels[j].numpy()
+                pre_i = predicted[j].numpy()
+                conf_mat[cate_i,pre_i] += 1.0
+
+        print('{} set Accuracy:{:.2%}'.format('Valid',conf_mat.trace()/conf_mat.sum()))
+        writer.add_scalars('Loss_group',{'valid_loss': loss_sigma / len(valid_loader)},epoch)
+        writer.add_scalars('Accuracy_group',{'valid_acc': conf_mat.trace() / conf_mat.sum()},epoch)
 print('Finished Training!')
 #----- save model draw confuse matrix ------
 net_save_path = os.path.join(log_dir,'net_param.pkl')
 torch.save(net.state_dict(),net_save_path)
 conf_mat_train,train_acc = validate(net, train_loader, 'train', classes_name)
-# conf_mat_valid,valid_acc = validate(net, valid_loader, 'valid', classes_name)
+conf_mat_valid,valid_acc = validate(net, valid_loader, 'valid', classes_name)
 show_confMat(conf_mat_train,classes_name, 'train', log_dir)
-# show_confMat(conf_mat_valid,classes_name, 'valid', log_dir)
+show_confMat(conf_mat_valid,classes_name, 'valid', log_dir)
 

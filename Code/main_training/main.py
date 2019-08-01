@@ -23,7 +23,7 @@ classes_name = ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', '
 train_bs = 16
 valid_bs = 16
 lr_init = 0.001
-max_epoch = 1
+max_epoch = 100
 
 # log
 result_dir = '../../Result/'
@@ -80,7 +80,7 @@ class Net(nn.Module):
     def forward(self, x):
         x = self.pool1(F.relu(self.conv1(x)))
         x = self.pool2(F.relu(self.conv2(x)))
-        print(x.shape())
+        # print(x.shape())
         x = x.view(-1, 16 * 5 * 5)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
@@ -195,7 +195,7 @@ for epoch in range(max_epoch):
 print('Finished Training')
 
 # ------------------------------------ step5: 保存模型 并且绘制混淆矩阵图 ------------------------------------
-net_save_path = os.path.join(log_dir, 'net_params.pkl')
+net_save_path = os.path.join(log_dir, 'net_params_main.pkl')
 torch.save(net.state_dict(), net_save_path)
 
 conf_mat_train, train_acc = validate(net, train_loader, 'train', classes_name)

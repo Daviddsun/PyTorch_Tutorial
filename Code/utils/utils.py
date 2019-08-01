@@ -44,6 +44,61 @@ class Net(nn.Module):
                 torch.nn.init.normal_(m.weight.data, 0, 0.01)
                 m.bias.data.zero_()
 
+class FocalBinaryCrossEntropy(nn.Module):
+    """
+        As title
+    """
+
+    def __init__(self, size_average=True, ignore_label=-1, gamma=0, alpha=0.5):
+        """
+            Args:
+                size_average
+                ignore_label
+        """
+        super(FocalBinaryCrossEntropy, self).__init__()
+        self.size_average = size_average
+        self.ignore_label = ignore_label
+
+        self.gamma = gamma
+        self.alpha = alpha
+
+    def forward(self, predict, target, weight=None):
+        """
+            Args:
+                predict:(n, h, w)
+                target:(n, h, w)
+                weight (Tensor, optional): a manual rescaling weight given to each class.
+                                           If given, has to be a Tensor of size "nclasses"
+        """
+        assert not target.requires_grad
+        # assert predict.dim() == 3
+        # assert target.dim() == 3
+        assert predict.size(0) == target.size(0), "{0} vs {1} ".format(predict.size(0), target.size(0))
+        # assert predict.size(1) == target.size(1), "{0} vs {1} ".format(predict.size(1), target.size(1))
+        # assert predict.size(2) == target.size(2), "{0} vs {1} ".format(predict.size(2), target.size(2))
+        target_mask = (target != self.ignore_label)
+        target = target[target_mask]
+
+        if not target.data.dim():
+            return Variable(torch.zeros(1))
+        predict = predict[target_mask]
+
+        predict = predict.view(-1, 1)
+        target = target.view(-1, 1)
+
+        pt = torch.sigmoid(predict)
+        logpt = torch.log(pt)
+
+        npt = 1 - torch.sigmoid(predict)
+        lognpt = torch.log(npt)
+
+        loss_positive = -1 * self.alpha * target * logpt * (1 - pt) ** self.gamma
+        loss_negtive = -1 * (1 - self.alpha) * (1 - target) * lognpt * 0.5
+
+        focal_loss = (loss_positive + loss_negtive).mean()
+        return focal_loss, loss_positive.mean(), loss_negtive.mean()
+
+
 class MyDataset(Dataset):
     def __init__(self, txt_path, transform = None, target_transform = None):
         fh = open(txt_path, 'r')

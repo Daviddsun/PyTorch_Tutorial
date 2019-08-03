@@ -1,0 +1,7 @@
+../../7_marker/trans/resize/3_resize.png 3
+../../7_marker/trans/resize/7_resize.png 7
+../../7_marker/trans/resize/2_resize.png 2
+../../7_marker/trans/resize/4_resize.png 4
+../../7_marker/trans/resize/5_resize.png 5
+../../7_marker/trans/resize/6_resize.png 6
+../../7_marker/trans/resize/1_resize.png 1

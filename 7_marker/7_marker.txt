@@ -5,10 +5,3 @@
 ../../7_marker/6.png 6
 ../../7_marker/5.png 5
 ../../7_marker/3.png 3
-../../7_marker/trans/3_resize.png 3
-../../7_marker/trans/7_resize.png 7
-../../7_marker/trans/2_resize.png 2
-../../7_marker/trans/4_resize.png 4
-../../7_marker/trans/5_resize.png 5
-../../7_marker/trans/6_resize.png 6
-../../7_marker/trans/1_resize.png 1

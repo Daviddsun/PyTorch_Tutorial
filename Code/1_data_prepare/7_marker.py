@@ -26,8 +26,10 @@ _attach_dir = '../../7_marker/trans/attach/'
 _label_txt= '../../7_marker/trans/attach/_lable.txt'
 
 img_h, img_w = 320, 320
-imgs = np.zeros([img_w, img_h, 3, 1])
-
+img_zero_x,img_zero_y = 500,500
+img_zeros = np.zeros([img_zero_x, img_zero_y, 3])
+# cv2.imshow('1',imgs)
+# cv2.waitKey()
 # print("2")
 # _7_Transform = transforms.Compose([
 #     transforms.Resize(320),
@@ -66,11 +68,16 @@ def gen_resize(txt_dir,resize_path_):
             cv2.imwrite(resize_path,img)
             gen_txt(resize_path_+'_resize.txt',resize_path_)
 
-def gen_affine(resized_dir,back_groud_dir,affine_out_dir,num_gen):
+def gen_affine(resized_dir,back_groud_dir,_attach_dir_,num_gen):
     with open(resized_dir+'_resize.txt','r') as f:
         lines_mk = f.readlines()
+        x_mk_zero_1,x_mk_zero_2,y_mk_zero_1,y_mk_zero_2 =(img_zero_x-img_w)/2,(img_zero_x+img_w)/2,(img_zero_y-img_h)/2,(img_zero_y+img_h)/2
+
         for i_mk in range(len(lines_mk)):
-            img_mk = cv2.imread(lines_mk[i_mk].rstrip().split()[0],-1)
+            img_mk_small = cv2.imread(lines_mk[i_mk].rstrip().split()[0],-1)
+            # print (img_mk_small.shape)
+            img_mk = copy.deepcopy(np.array(img_zeros))
+            img_mk[x_mk_zero_1:x_mk_zero_2,y_mk_zero_1:y_mk_zero_2 ,:][img_mk_small > 10]=img_mk_small[img_mk_small > 10]
             # print(img_mk.shape)
             rows,cols,channels= img_mk.shape[:3]
             with open(back_groud_dir+'_background.txt','r') as b_g :
@@ -94,12 +101,14 @@ def gen_affine(resized_dir,back_groud_dir,affine_out_dir,num_gen):
                         pts_aff_2_ = np.float32([[cols*n1,rows*n2],[cols*n3,rows*n4],[cols * n5, rows * n6]])
                         pts_per_1 = np.float32([[56, 65], [238, 52], [28, 237], [239, 240]])
                         pts_per_2 = np.float32([[0, 0], [200, 0], [0, 200], [200, 200]])
+
                         M_aff = cv2.getAffineTransform(pts_aff_1_,pts_aff_2_)
                         M_per = cv2.getPerspectiveTransform(pts_per_1, pts_per_2)
-                        corner_0 = np.dot(M_aff,(0,0,1))     # M .* [x,y,1].T
-                        corner_2 = np.dot(M_aff,(320,320,1))
-                        corner_1 = np.dot(M_aff,(0,320,1))
-                        corner_3 = np.dot(M_aff,(320,0,1))
+
+                        corner_0 = np.dot(M_aff,(x_mk_zero_1,y_mk_zero_1,1))     # M .* [x,y,1].T
+                        corner_2 = np.dot(M_aff,(x_mk_zero_2,y_mk_zero_2,1))
+                        corner_1 = np.dot(M_aff,(x_mk_zero_1,y_mk_zero_2,1))
+                        corner_3 = np.dot(M_aff,(x_mk_zero_2,y_mk_zero_1,1))
 
                         corner_list = [[corner_0[0],corner_0[1]],[corner_1[0],corner_1[1]],[corner_2[0],corner_2[1]],[corner_3[0],corner_3[1]]]
 
@@ -112,12 +121,9 @@ def gen_affine(resized_dir,back_groud_dir,affine_out_dir,num_gen):
                         plt.subplot(232)
                         plt.imshow(dst_per)
                         # plt.show()
-                        img_name = lines_mk[i_mk].rstrip().split()[1]
-                        aff_path = os.path.join(affine_out_dir,img_name)+'_'+str(j)+'_affine.png'
-                        per_path = os.path.join(affine_out_dir, img_name) + str(j) + '_per.png'
 
-                        # cv2.imwrite(aff_path,dst_aff)
-                        # cv2.imwrite(per_path,dst_per)
+
+
 
                         # img_mk_mask = np.zeros(img_mk.shape,img_mk.dtype)
                         # # print(img_mk.dtype)
@@ -127,8 +133,8 @@ def gen_affine(resized_dir,back_groud_dir,affine_out_dir,num_gen):
                         # # print(poly)
                         # cv2.fillPoly(img_mk_mask, [poly], (255, 255, 255))
                         #
-                        print(rows_mk*0.1+img_h*0.5,rows_mk*0.9-img_h*0.5,cols_mk*0.1+img_w*0.5,cols_mk*0.9-img_w*0.5)
-                        [center_x,center_y] = [np.random.randint(rows_mk*0.1+img_h*0.5,rows_mk*0.9-img_h*0.5) ,np.random.randint(cols_mk*0.1+img_w*0.5,cols_mk*0.9-img_w*0.5)]
+                        # print(rows_mk*0.1+img_h*0.5,rows_mk*0.9-img_h*0.5,cols_mk*0.1+img_w*0.5,cols_mk*0.9-img_w*0.5)
+                        [center_x,center_y] = [np.random.randint(rows_mk*0.1+img_zero_x*0.5,rows_mk*0.9-img_zero_x*0.5) ,np.random.randint(cols_mk*0.1+img_zero_y*0.5,cols_mk*0.9-img_zero_y*0.5)]
 
                         # center = (center_x,center_y)
                         # center_list=[center,center,center,center]
@@ -159,10 +165,22 @@ def gen_affine(resized_dir,back_groud_dir,affine_out_dir,num_gen):
                         #--------- 方法三、 np.array()[] []
                         imgcopy = copy.deepcopy(np.array(img_bg))
                         # print([dst_per>10])
-                        x1,x2 = center_x-img_w/2,center_x-img_w/2+320
-                        y1,y2 = center_y-img_w/2,center_y-img_w/2+320
-                        print(x1,x2,y1,y2)
+                        x1,x2 = center_x-img_zero_x/2,center_x-img_zero_x/2+img_zero_x
+                        y1,y2 = center_y-img_zero_y/2,center_y-img_zero_y/2+img_zero_y
+                        # xxx=corner_list+[[x1,y1]]
+                        # print(corner_list)
+                        # print(corner_list+[[x1,y1]])
+                        # print(center_x,center_y)
+                        # print(x1,x2,y1,y2)
                         imgcopy[x1:x2,y1:y2,:][dst_per>10]=dst_per[dst_per>10]
+
+                        img_name = lines_mk[i_mk].rstrip().split()[1]
+                        # aff_path = os.path.join(affine_out_dir,img_name)+'_'+str(j)+'_affine.png'
+                        out_path = os.path.join(_attach_dir_, img_name) + str(j) + '_.png'
+
+                        # cv2.imwrite(aff_path,dst_aff)
+                        cv2.imwrite(out_path,imgcopy)
+                        # line = out_path+' '+
 
                         plt.subplot(233)
                         # plt.imshow(attach)
@@ -231,4 +249,4 @@ if __name__ == '__main__':
     gen_resize(_7_marker_txt,_resize_dir)
     gen_txt(_backgroud_txt,_backgroud_dir)
     # gen_tranform_1(1, _7_marker_txt,_7_marker_trans,_7_Transform)
-    gen_affine(_resize_dir,_backgroud_dir,_affine_dir,1)
+    gen_affine(_resize_dir,_backgroud_dir,_attach_dir,1)

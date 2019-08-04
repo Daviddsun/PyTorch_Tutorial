@@ -23,10 +23,10 @@ _backgroud_txt = '../../7_marker/trans/backgroud/_background.txt'
 _affine_dir = '../../7_marker/trans/affine/'
 
 _attach_dir = '../../7_marker/trans/attach/'
-_label_txt= '../../7_marker/trans/attach/_lable.txt'
+_label_txt= '../../7_marker/trans/attach/_label.txt'
 
 img_h, img_w = 320, 320
-img_zero_x,img_zero_y = 500,500
+img_zero_x,img_zero_y = 400,400
 img_zeros = np.zeros([img_zero_x, img_zero_y, 3])
 # cv2.imshow('1',imgs)
 # cv2.waitKey()
@@ -71,7 +71,11 @@ def gen_resize(txt_dir,resize_path_):
 def gen_affine(resized_dir,back_groud_dir,_attach_dir_,num_gen):
     with open(resized_dir+'_resize.txt','r') as f:
         lines_mk = f.readlines()
+        # after broaden black margin,the markers' (x,y)
         x_mk_zero_1,x_mk_zero_2,y_mk_zero_1,y_mk_zero_2 =(img_zero_x-img_w)/2,(img_zero_x+img_w)/2,(img_zero_y-img_h)/2,(img_zero_y+img_h)/2
+
+        lb_f = open(_label_txt,'w')
+
 
         for i_mk in range(len(lines_mk)):
             img_mk_small = cv2.imread(lines_mk[i_mk].rstrip().split()[0],-1)
@@ -99,15 +103,15 @@ def gen_affine(resized_dir,back_groud_dir,_attach_dir_,num_gen):
                         # print(n1)
                         pts_aff_1_ = np.float32([[0,0],[cols-1,0],[0,rows-1]])
                         pts_aff_2_ = np.float32([[cols*n1,rows*n2],[cols*n3,rows*n4],[cols * n5, rows * n6]])
-                        pts_per_1 = np.float32([[56, 65], [238, 52], [28, 237], [239, 240]])
+                        pts_per_1 = np.float32([[56, 65*n3], [238*n6, 52], [28, 237*n3], [239*n6, 240]])
                         pts_per_2 = np.float32([[0, 0], [200, 0], [0, 200], [200, 200]])
 
                         M_aff = cv2.getAffineTransform(pts_aff_1_,pts_aff_2_)
                         M_per = cv2.getPerspectiveTransform(pts_per_1, pts_per_2)
 
                         corner_0 = np.dot(M_aff,(x_mk_zero_1,y_mk_zero_1,1))     # M .* [x,y,1].T
-                        corner_2 = np.dot(M_aff,(x_mk_zero_2,y_mk_zero_2,1))
                         corner_1 = np.dot(M_aff,(x_mk_zero_1,y_mk_zero_2,1))
+                        corner_2 = np.dot(M_aff,(x_mk_zero_2,y_mk_zero_2,1))
                         corner_3 = np.dot(M_aff,(x_mk_zero_2,y_mk_zero_1,1))
 
                         corner_list = [[corner_0[0],corner_0[1]],[corner_1[0],corner_1[1]],[corner_2[0],corner_2[1]],[corner_3[0],corner_3[1]]]
@@ -172,32 +176,46 @@ def gen_affine(resized_dir,back_groud_dir,_attach_dir_,num_gen):
                         # print(corner_list+[[x1,y1]])
                         # print(center_x,center_y)
                         # print(x1,x2,y1,y2)
-                        imgcopy[x1:x2,y1:y2,:][dst_per>10]=dst_per[dst_per>10]
+                        imgcopy[x1:x2,y1:y2,:][dst_aff>10]=dst_aff[dst_aff>10]
 
                         img_name = lines_mk[i_mk].rstrip().split()[1]
                         # aff_path = os.path.join(affine_out_dir,img_name)+'_'+str(j)+'_affine.png'
-                        out_path = os.path.join(_attach_dir_, img_name) + str(j) + '_.png'
+                        out_path = os.path.join(_attach_dir_, img_name) +'_'+str(i_b)+'_'+str(j) + '_.png'
 
                         # cv2.imwrite(aff_path,dst_aff)
                         cv2.imwrite(out_path,imgcopy)
-                        # line = out_path+' '+
+                        lb_0y,lb_0x = corner_0[1] +center_x-img_zero_x/2, corner_0[0]+center_y-img_zero_y/2
+                        lb_1y,lb_1x = corner_1[1] +center_x-img_zero_x/2, corner_1[0]+center_y-img_zero_y/2
+                        lb_2y,lb_2x = corner_2[1] +center_x-img_zero_x/2, corner_2[0]+center_y-img_zero_y/2
+                        lb_3y,lb_3x = corner_3[1] +center_x-img_zero_x/2, corner_3[0]+center_y-img_zero_y/2
+                        list_lb = [[lb_0x,lb_0y],[lb_1x,lb_1y],[lb_2x,lb_2y],[lb_3x,lb_3y]]
+                        label_line = out_path + '  '+img_name +'_'+str(i_b)+'_'+str(j)+'  '+ str(lb_0x)+'_'+str(lb_0y)+'_'+str(lb_1x)+'_'+str(lb_1y)+'_'+str(lb_2x)+'_'+str(lb_2y)+'_'+str(lb_3x)+'_'+str(lb_3y)+'\n'
+                        lb_f.write(label_line)
+                        # print(line)
 
                         plt.subplot(233)
-                        # plt.imshow(attach)
-                        plt.subplot(234)
-                        # plt.imshow(outPutImg)
-                        plt.subplot(235)
-                        # plt.imshow(imgcopy_test)
-                        plt.subplot(236)
                         plt.imshow(imgcopy)
+                        for i in range(len(list_lb)):
+                            color_=['r','g','b','c']
+                            plt.scatter( list_lb[i][0],list_lb[i][1], color=color_[i])
+                        for i in range(len(corner_list)):
+                            plt.scatter( corner_list[i][0],corner_list[i][1], color=color_[i])
+                        plt.scatter(center_y,center_x,color = 'g',label = 'c')
+                        # plt.subplot(234)
+
+                        # plt.imshow(outPutImg)
+                        # plt.subplot(235)
+                        # plt.imshow(imgcopy_test)
+                        # plt.subplot(236)
+                        # plt.imshow()
                         plt.show()
                         # cv2.imshow('1',mk1)
                         # cv2.imshow('1',imgcopy)
                         # cv2.waitKey()
-
             # plt.ioff()
             plt.clf()
             plt.close()
+        lb_f.close()
 
 #--------  use torch transform ---------#
 # class Mytrans(Dataset):
@@ -249,4 +267,4 @@ if __name__ == '__main__':
     gen_resize(_7_marker_txt,_resize_dir)
     gen_txt(_backgroud_txt,_backgroud_dir)
     # gen_tranform_1(1, _7_marker_txt,_7_marker_trans,_7_Transform)
-    gen_affine(_resize_dir,_backgroud_dir,_attach_dir,1)
+    gen_affine(_resize_dir,_backgroud_dir,_attach_dir,2)

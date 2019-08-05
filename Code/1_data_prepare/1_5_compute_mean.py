@@ -10,11 +10,12 @@ import random
 """
 
 
-train_txt_path = '../../Data/train.txt'
+# train_txt_path = '../../Data/train.txt'
+train_txt_path = '../../7_marker/trans/attach/_label.txt'
 
-CNum = 2    # 挑选多少图片进行计算
+CNum = 35    # 挑选多少图片进行计算
 
-img_h, img_w = 32, 32
+img_h, img_w = 800,1200
 imgs = np.zeros([img_w, img_h, 3, 1])
 means, stdevs = [], []
 

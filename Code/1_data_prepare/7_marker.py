@@ -39,6 +39,16 @@ img_zeros = np.zeros([img_zero_x, img_zero_y, 3])
 #
 # ])
 
+def resize_background(_background_txt_, _background_dir_):
+    resize_f = open(_backgroud_txt,'r')
+    line_resize = resize_f.readlines()
+    for i_resize in range(len(line_resize)):
+        bg_ = cv2.imread(line_resize[i_resize].rstrip().split()[0])
+        bg_resize = cv2.resize(bg_,(1200,800))
+        bg_resize_path = line_resize[i_resize].rstrip().split()[0]
+        cv2.imwrite(bg_resize_path,bg_resize)
+    resize_f.close()
+
 
 def gen_txt(txt_path, img_dir):
     f = open(txt_path, 'w')
@@ -189,7 +199,7 @@ def gen_affine(resized_dir,back_groud_dir,_attach_dir_,num_gen):
                         lb_2y,lb_2x = corner_2[1] +center_x-img_zero_x/2, corner_2[0]+center_y-img_zero_y/2
                         lb_3y,lb_3x = corner_3[1] +center_x-img_zero_x/2, corner_3[0]+center_y-img_zero_y/2
                         list_lb = [[lb_0x,lb_0y],[lb_1x,lb_1y],[lb_2x,lb_2y],[lb_3x,lb_3y]]
-                        label_line = out_path + '  '+img_name +'_'+str(i_b)+'_'+str(j)+'  '+ str(lb_0x)+'_'+str(lb_0y)+'_'+str(lb_1x)+'_'+str(lb_1y)+'_'+str(lb_2x)+'_'+str(lb_2y)+'_'+str(lb_3x)+'_'+str(lb_3y)+'\n'
+                        label_line = out_path + ','+img_name +'_'+str(i_b)+'_'+str(j)+','+img_name+'_' + str(lb_0x)+'_'+str(lb_0y)+'_'+str(lb_1x)+'_'+str(lb_1y)+'_'+str(lb_2x)+'_'+str(lb_2y)+'_'+str(lb_3x)+'_'+str(lb_3y)+'\n'
                         lb_f.write(label_line)
                         # print(line)
 
@@ -266,5 +276,6 @@ if __name__ == '__main__':
 
     gen_resize(_7_marker_txt,_resize_dir)
     gen_txt(_backgroud_txt,_backgroud_dir)
+    resize_background(_backgroud_txt,_backgroud_dir)
     # gen_tranform_1(1, _7_marker_txt,_7_marker_trans,_7_Transform)
-    gen_affine(_resize_dir,_backgroud_dir,_attach_dir,2)
+    gen_affine(_resize_dir,_backgroud_dir,_attach_dir,1)

@@ -14,18 +14,19 @@ import torch.optim as optim
 from tensorboardX import SummaryWriter
 from datetime import datetime
 
-train_txt_path = '../../Data/train.txt'
-valid_txt_path = '../../Data/valid.txt'
-
-classes_name = ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
-
+# train_txt_path = '../../Data/train.txt'
+# valid_txt_path = '../../Data/valid.txt'
+train_txt_path = '../../7_marker/trans/attach/_label.txt'
+valid_txt_path = '../../7_marker/trans/attach/_label.txt'
+# classes_name = ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+classes_name = ['1', '2', '3', '4', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
 train_bs = 16
 valid_bs = 16
 lr_init = 0.001
 max_epoch = 100
 
 # ---- log ----
-result_dir = '../../Result/'
+result_dir = '../../Result/7_marker/'
 now_time = datetime.now()
 time_str = datetime.strftime(now_time,'%m-%d-%H-%M-%S')
 
@@ -35,8 +36,12 @@ if not os.path.exists(log_dir):
 writer = SummaryWriter(logdir=log_dir)
 # ------------data load ---------
 # -------- pre pare data -----------
-normMean = [0.4948052, 0.48568845, 0.44682974]
-normStd = [0.24580306, 0.24236229, 0.2603115]
+# normMean = [0.4948052, 0.48568845, 0.44682974]
+# normStd = [0.24580306, 0.24236229, 0.2603115]
+
+normMean = [0.4864198, 0.48983124, 0.47931236]
+normStd = [0.2482031, 0.2421307, 0.2509659]
+
 normalTransform = transforms.Normalize(normMean,normStd)
 trainTransform = transforms.Compose([
     transforms.Resize(32),
@@ -63,7 +68,7 @@ class Net (nn.Module):
         self.pool1 = nn.MaxPool2d(2,2)
         self.conv2 = nn.Conv2d(6,16,5)
         self.pool2 = nn.MaxPool2d(2,2)
-        self.conv3 = nn.Conv2d(16,16,1)
+        # self.conv3 = nn.Conv2d(16,16,1)
         self.fc1 = nn.Linear(16*5*5,120)
         self.fc2 = nn.Linear(120,84)
         self.fc3 = nn.Linear(84,10)

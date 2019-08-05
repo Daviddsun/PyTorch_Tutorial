@@ -199,9 +199,9 @@ def gen_affine(resized_dir,back_groud_dir,_attach_dir_,num_gen):
                         lb_2y,lb_2x = corner_2[1] +center_x-img_zero_x/2, corner_2[0]+center_y-img_zero_y/2
                         lb_3y,lb_3x = corner_3[1] +center_x-img_zero_x/2, corner_3[0]+center_y-img_zero_y/2
                         list_lb = [[lb_0x,lb_0y],[lb_1x,lb_1y],[lb_2x,lb_2y],[lb_3x,lb_3y]]
-                        label_line = out_path + ','+img_name +'_'+str(i_b)+'_'+str(j)+','+img_name+'_' + str(lb_0x)+'_'+str(lb_0y)+'_'+str(lb_1x)+'_'+str(lb_1y)+'_'+str(lb_2x)+'_'+str(lb_2y)+'_'+str(lb_3x)+'_'+str(lb_3y)+'\n'
+                        label_line = out_path +','+img_name+',' + str(lb_0x)+','+str(lb_0y)+','+str(lb_1x)+','+str(lb_1y)+','+str(lb_2x)+','+str(lb_2y)+','+str(lb_3x)+','+str(lb_3y)+'\n'
                         lb_f.write(label_line)
-                        # print(line)
+                        print(label_line.rstrip().split(',')[0],label_line.rstrip().split(',')[1],label_line.rstrip().split(',')[2],label_line.rstrip().split(',')[3])
 
                         plt.subplot(233)
                         plt.imshow(imgcopy)

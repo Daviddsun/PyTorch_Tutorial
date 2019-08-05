@@ -69,6 +69,30 @@ class MyDataset(Dataset):
     def __len__(self):
         return len(self.imgs)
 
+class _7_marker_Dataset(Dataset):
+    def __init__(self, txt_path, transform = None, target_transform = None):
+        fh = open(txt_path, 'r')
+        imgs = []
+        for line in fh:
+            line = line.rstrip()
+            words = line.split(',')
+            imgs.append((words[0], int(words[1]), float(words[2]),float(words[3]),float(words[4]),float(words[5]),float(words[6]),float(words[7]),float(words[8]),float(words[9])))
+
+        self.imgs = imgs        # 最主要就是要生成这个list， 然后DataLoader中给index，通过getitem读取图片数据
+        self.transform = transform
+        self.target_transform = target_transform
+
+    def __getitem__(self, index):
+        fn, label, x1,y1,x2,y2,x3,y3,x4,y4 = self.imgs[index]
+        img = Image.open(fn).convert('RGB')     # 像素值 0~255，在transfrom.totensor会除以255，使像素值变成 0~1
+
+        if self.transform is not None:
+            img = self.transform(img)   # 在这里做transform，转为tensor等等
+
+        return img, label,x1,y1,x2,y2,x3,y3,x4,y4
+
+    def __len__(self):
+        return len(self.imgs)
 
 def validate(net, data_loader, set_name, classes_name):
     """
